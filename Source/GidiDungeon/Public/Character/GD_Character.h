@@ -31,9 +31,17 @@ class GIDIDUNGEON_API AGD_Character : public ACharacter
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Input", meta=(AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> InteractAction;
+
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Data", meta=(AllowPrivateAccess = "true"))
+	class UDataTable* CharacterDataTable;
+
+	struct FCharacterStats* CharacterStats;
 public:
 	// Sets default values for this character's properties
 	AGD_Character();
+
+	void UpdateCharacterStats(int32 CharacterLevel);
 
 protected:
 	// Called when the game starts or when spawned
@@ -53,4 +61,5 @@ public:
 
 	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	FORCEINLINE FCharacterStats* GetCharacterStats() const { return CharacterStats; }
 };

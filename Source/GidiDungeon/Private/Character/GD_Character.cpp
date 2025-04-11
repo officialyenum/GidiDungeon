@@ -12,6 +12,7 @@
 #include "GameFramework/Controller.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Data/Structs/CharacterStats.h"
 
 
 AGD_Character::AGD_Character()
@@ -50,6 +51,21 @@ AGD_Character::AGD_Character()
 	
 }
 
+void AGD_Character::UpdateCharacterStats(int32 CharacterLevel)
+{
+	if(CharacterDataTable)
+	{
+		TArray<FCharacterStats*> CharacterStatsRows;
+		CharacterDataTable->GetAllRows<FCharacterStats>(TEXT("GD Character"), CharacterStatsRows);
+		if (CharacterStatsRows.Num() > 0)
+		{
+			const auto NewCharacterLevel = FMath::Clamp(CharacterLevel, 1, CharacterStatsRows.Num());
+			CharacterStats = CharacterStatsRows[NewCharacterLevel - 1];
+			GetCharacterMovement()->MaxWalkSpeed = GetCharacterStats()->WalkSpeed;
+		}
+	}
+}
+
 void AGD_Character::BeginPlay()
 {
 	Super::BeginPlay();
@@ -61,6 +77,8 @@ void AGD_Character::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+
+	UpdateCharacterStats(1);
 	
 }
 
@@ -113,13 +131,13 @@ void AGD_Character::Look(const FInputActionValue& Value)
 void AGD_Character::SprintStart(const FInputActionValue& Value)
 {
 	GEngine->AddOnScreenDebugMessage(2, 5.f, FColor::Blue, TEXT("StartSprint"));
-	GetCharacterMovement()->MaxWalkSpeed=3000.f;
+	GetCharacterMovement()->MaxWalkSpeed = GetCharacterStats()->SprintSpeed;;
 }
 
 void AGD_Character::SprintEnd(const FInputActionValue& Value)
 {
 	GEngine->AddOnScreenDebugMessage(2, 5.f, FColor::Blue, TEXT("EndSprint"));
-	GetCharacterMovement()->MaxWalkSpeed=500.f;
+	GetCharacterMovement()->MaxWalkSpeed= GetCharacterStats()->WalkSpeed;
 }
 
 void AGD_Character::Interact(const FInputActionValue& Value)
