@@ -35,12 +35,13 @@ I'm actively building the game with the following milestones:
 - [x] Game Mode, States and Instance (C++)
 - [x] Player movement and input bindings (C++)
 - [x] Chest interaction system
+- [x] Door Open system
+- [x] Networked chest and Door state replication
 - [x] Dungeon arena polish & navigation
 
 ### 🛠️ In Progress
 - [ ] Spell-casting mechanics (with cooldown + stun effect)
 - [ ] Basic multiplayer lobby + session joining
-- [ ] Networked chest state replication
 - [ ] UI for spell cooldowns and chest looting
 - [ ] Sound and visual feedback for spells
 
