@@ -52,6 +52,14 @@ protected:
 	void SprintStart(const struct FInputActionValue& Value);
 	void SprintEnd(const struct FInputActionValue& Value);
 	void Interact(const struct FInputActionValue& Value);
+
+	// Replicated Server Functions
+	UFUNCTION(Server, Reliable)
+	void SprintStart_Server();
+	UFUNCTION(Server, Reliable)
+	void SprintEnd_Server();
+	UFUNCTION(Server, Reliable)
+	void Interact_Server();
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -62,4 +70,7 @@ public:
 	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 	FORCEINLINE FCharacterStats* GetCharacterStats() const { return CharacterStats; }
+private:
+	UPROPERTY()
+	AActor* InteractableActor;
 };
