@@ -9,8 +9,10 @@
 #include "Character/GD_Character.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
+#include "Game/GD_GameMode.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Perception/PawnSensingComponent.h"
+#include "PickUp/GD_BasePickup.h"
 
 
 AGD_Minion::AGD_Minion()
@@ -34,6 +36,7 @@ AGD_Minion::AGD_Minion()
 	Collision->SetSphereRadius(100.f);
 	Collision->SetupAttachment(RootComponent);
 
+
 	GetCapsuleComponent()->InitCapsuleSize(60.0f, 96.0f);
 	GetCapsuleComponent()->SetGenerateOverlapEvents(true);
 
@@ -43,6 +46,13 @@ AGD_Minion::AGD_Minion()
 	if (SkeletalMeshAsset.Succeeded())
 	{
 		GetMesh()->SetSkeletalMesh(SkeletalMeshAsset.Object);
+	}
+
+	static ConstructorHelpers::FClassFinder<AGD_BasePickup>
+	PickUpMeshAsset(TEXT("/Game/Blueprints/Pickups/BP_GoldCoin.BP_GoldCoin"));
+	if (PickUpMeshAsset.Succeeded())
+	{
+		SpawnedPickUp = PickUpMeshAsset.Class;
 	}
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
@@ -56,7 +66,22 @@ void AGD_Minion::BeginPlay()
 {
 	Super::BeginPlay();
 	SetNextPatrolLocation();
+	OnTakeAnyDamage.AddDynamic(this, &AGD_Minion::OnDamage);
 	
+}
+
+void AGD_Minion::OnDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy,
+	AActor* DamageCauser)
+{
+	Health -= Damage;
+	if (Health > 0) return;
+
+
+	if (SpawnedPickUp)
+	{
+		GetWorld()->SpawnActor<AGD_BasePickup>(SpawnedPickUp, GetActorLocation(), GetActorRotation());
+	}
+	Destroy();
 }
 
 void AGD_Minion::Tick(float DeltaTime)
@@ -86,6 +111,17 @@ void AGD_Minion::Chase(APawn* Pawn)
 	GetCharacterMovement()->MaxWalkSpeed = ChaseSpeed;
 	UAIBlueprintHelperLibrary::SimpleMoveToActor(GetController(), Pawn);
 	DrawDebugSphere(GetWorld(),Pawn->GetActorLocation(), 25.f, 12,	FColor::Red, true, 10.f, 0, 2.f);
+
+	if (const auto GM = Cast<AGD_GameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		GM->AlertMinions(this, Pawn->GetActorLocation(), AlertRadius);
+	}
+}
+
+void AGD_Minion::GoToLocation(const FVector& Location)
+{
+	PatrolLocation = Location;
+	UAIBlueprintHelperLibrary::SimpleMoveToLocation(GetController(), PatrolLocation);
 }
 
 void AGD_Minion::PostInitializeComponents()
@@ -95,12 +131,13 @@ void AGD_Minion::PostInitializeComponents()
 	if (GetLocalRole() != ROLE_Authority) return;
 	OnActorBeginOverlap.AddDynamic(this, &AGD_Minion::OnBeginOverlap);
 	GetPawnSense()->OnSeePawn.AddDynamic(this, &AGD_Minion::OnPawnDetected);
+	GetPawnSense()->OnHearNoise.AddDynamic(this, &AGD_Minion::OnHearNoise);
 }
 
 void AGD_Minion::OnPawnDetected(APawn* Pawn)
 {
 	if (!Pawn->IsA<AGD_Character>()) return;
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Character Detected : %s"));
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Character Detected "));
 	if (GetCharacterMovement()->MaxWalkSpeed != ChaseSpeed)
 	{
 		Chase(Pawn);
@@ -109,10 +146,17 @@ void AGD_Minion::OnPawnDetected(APawn* Pawn)
 	
 }
 
+void AGD_Minion::OnHearNoise(APawn* PawnInstigator, const FVector& Location, float Volume)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Noise Heard"));
+	GoToLocation(Location);
+	UAIBlueprintHelperLibrary::SimpleMoveToLocation(GetController(), PatrolLocation);
+}
+
 void AGD_Minion::OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
 	if (!OtherActor->IsA<AGD_Character>()) return;
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Character Captured : %s"));
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Character Captured"));
 }
 
 

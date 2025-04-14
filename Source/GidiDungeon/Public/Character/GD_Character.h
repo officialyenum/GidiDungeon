@@ -11,29 +11,35 @@ class GIDIDUNGEON_API AGD_Character : public ACharacter
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Custom|Camera", meta=(AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Component|Weapon", meta=(AllowPrivateAccess = "true"))
+	TObjectPtr<class UGD_WeaponProjectileComponent> Weapon;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Camera", meta=(AllowPrivateAccess = "true"))
 	TObjectPtr<class USpringArmComponent> CameraBoom;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Custom|Camera", meta=(AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Camera", meta=(AllowPrivateAccess = "true"))
 	TObjectPtr<class UCameraComponent> FollowCamera;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Stealth", meta=(AllowPrivateAccess = "true"))
+	TObjectPtr<class UPawnNoiseEmitterComponent> NoiseEmitter;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Input", meta=(AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Input", meta=(AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputMappingContext> DefaultMappingContext;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Input", meta=(AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Input", meta=(AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> MoveAction;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Input", meta=(AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Input", meta=(AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> LookAction;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Input", meta=(AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Input", meta=(AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> SprintAction;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Input", meta=(AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Input", meta=(AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> InteractAction;
 
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Data", meta=(AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Data", meta=(AllowPrivateAccess = "true"))
 	class UDataTable* CharacterDataTable;
 
 	struct FCharacterStats* CharacterStats;
@@ -70,6 +76,7 @@ public:
 	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 	FORCEINLINE FCharacterStats* GetCharacterStats() const { return CharacterStats; }
+	FORCEINLINE UGD_WeaponProjectileComponent* GetWeapon() const { return Weapon; }
 private:
 	UPROPERTY()
 	AActor* InteractableActor;

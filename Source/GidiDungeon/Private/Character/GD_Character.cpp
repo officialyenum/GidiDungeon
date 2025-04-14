@@ -12,6 +12,8 @@
 #include "GameFramework/Controller.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Component/GD_WeaponProjectileComponent.h"
+#include "Components/PawnNoiseEmitterComponent.h"
 #include "Data/Interface/GD_Interactable.h"
 #include "Data/Structs/CharacterStats.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -29,6 +31,13 @@ AGD_Character::AGD_Character()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("Follow Camera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
+
+	
+	NoiseEmitter = CreateDefaultSubobject<UPawnNoiseEmitterComponent>(TEXT("Noise Emitter"));
+	NoiseEmitter->NoiseLifetime = 0.01f;
+
+	Weapon = CreateDefaultSubobject<UGD_WeaponProjectileComponent>(TEXT("Weapon"));
+	Weapon->SetupAttachment(RootComponent);
 	
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationRoll= false;
@@ -43,6 +52,7 @@ AGD_Character::AGD_Character()
 		GetMesh()->SetSkeletalMesh(SkeletalMeshAsset.Object);
 		GetMesh()->SetRelativeLocation(FVector(0.f,0.f,-91.f));
 	}
+	Weapon->SetRelativeLocation(FVector(120.0f, 70.0f, 0.f));
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.f,500.f,0.f);
@@ -128,6 +138,16 @@ void AGD_Character::Tick(float DeltaTime)
 	else
 	{
 		InteractableActor = nullptr;
+	}
+
+	if (GetCharacterMovement()->MaxWalkSpeed == GetCharacterStats()->SprintSpeed)
+	{
+			auto Noise = 1.f;
+			if (GetCharacterStats() && GetCharacterStats()->StealthMultiplier)
+			{
+				Noise = Noise / GetCharacterStats()->StealthMultiplier;
+			}
+			NoiseEmitter->MakeNoise(this, Noise, GetActorLocation());
 	}
 	
 }

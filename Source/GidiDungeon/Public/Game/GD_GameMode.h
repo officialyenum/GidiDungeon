@@ -15,4 +15,7 @@ class GIDIDUNGEON_API AGD_GameMode : public AGameMode
 	GENERATED_BODY()
 public:
 	AGD_GameMode();
+
+	UFUNCTION(BlueprintCallable, Category="GM|Minions")
+	void AlertMinions(class AActor* AlertInstigator, const FVector& Location, float Radius);
 };
