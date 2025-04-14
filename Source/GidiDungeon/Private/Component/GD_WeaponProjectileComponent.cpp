@@ -38,13 +38,24 @@ void UGD_WeaponProjectileComponent::BeginPlay()
 	
 }
 
+void UGD_WeaponProjectileComponent::Throw_Client_Implementation()
+{
+	const auto Character = Cast<AGD_Character>(GetOwner());
+	if (ThrowAnimation != nullptr)
+	{
+		if (const auto AnimInstance = Character->GetMesh()->GetAnimInstance(); AnimInstance != nullptr)
+		{
+			AnimInstance->Montage_Play(ThrowAnimation, 1.0f);
+		}
+	}
+}
+
 void UGD_WeaponProjectileComponent::TickComponent(float DeltaTime, ELevelTick TickType,
                                                   FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 }
-
 
 void UGD_WeaponProjectileComponent::SetProjectileClass(TSubclassOf<AGD_ProjectileBase> NewProjectileClass)
 {
@@ -60,13 +71,18 @@ void UGD_WeaponProjectileComponent::Throw_Server_Implementation()
 {
 	if (ProjectileClass)
 	{
-		const auto Character = Cast<AGD_Character>(GetOwner());
-		const auto ProjectileSpawnLocation = GetComponentLocation();
-		const auto ProjectileSpawnRotation = GetComponentRotation();
-		auto ProjectileSpawnParams = FActorSpawnParameters();
-		ProjectileSpawnParams.Owner = GetOwner();
-		ProjectileSpawnParams.Instigator = Character;
+		Throw_Client();
+		FTimerHandle TimerHandle;
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&]()
+		{
+			const auto Character = Cast<AGD_Character>(GetOwner());
+			const auto ProjectileSpawnLocation = GetComponentLocation();
+			const auto ProjectileSpawnRotation = GetComponentRotation();
+			auto ProjectileSpawnParams = FActorSpawnParameters();
+			ProjectileSpawnParams.Owner = GetOwner();
+			ProjectileSpawnParams.Instigator = Character;
 
-		GetWorld()->SpawnActor<AGD_ProjectileBase>(ProjectileClass, ProjectileSpawnLocation, ProjectileSpawnRotation, ProjectileSpawnParams);
+			GetWorld()->SpawnActor<AGD_ProjectileBase>(ProjectileClass, ProjectileSpawnLocation, ProjectileSpawnRotation, ProjectileSpawnParams);
+		}, .4f, false);
 	}
 }

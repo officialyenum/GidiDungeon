@@ -38,6 +38,7 @@ AGD_Character::AGD_Character()
 
 	Weapon = CreateDefaultSubobject<UGD_WeaponProjectileComponent>(TEXT("Weapon"));
 	Weapon->SetupAttachment(RootComponent);
+	Weapon->SetIsReplicated(true);
 	
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationRoll= false;
@@ -102,6 +103,8 @@ void AGD_Character::BeginPlay()
 	UpdateCharacterStats(1);
 	
 }
+
+
 
 void AGD_Character::Tick(float DeltaTime)
 {
@@ -211,20 +214,12 @@ void AGD_Character::Interact(const FInputActionValue& Value)
 
 void AGD_Character::SprintStart_Server_Implementation()
 {
-	if (GetCharacterStats())
-	{
-		GEngine->AddOnScreenDebugMessage(2, 5.f, FColor::Blue, TEXT("StartSprint"));
-		GetCharacterMovement()->MaxWalkSpeed = GetCharacterStats()->SprintSpeed;
-	}
+	SprintStart_Client();
 }
 
 void AGD_Character::SprintEnd_Server_Implementation()
 {
-	if (GetCharacterStats())
-	{
-		GEngine->AddOnScreenDebugMessage(2, 5.f, FColor::Blue, TEXT("EndSprint"));
-		GetCharacterMovement()->MaxWalkSpeed = GetCharacterStats()->WalkSpeed;
-	}
+	SprintEnd_Client();
 }
 
 void AGD_Character::Interact_Server_Implementation()
@@ -232,5 +227,23 @@ void AGD_Character::Interact_Server_Implementation()
 	if (InteractableActor)
 	{
 		IGD_Interactable::Execute_Interact(InteractableActor, this);
+	}
+}
+
+void AGD_Character::SprintStart_Client_Implementation()
+{
+	if (GetCharacterStats())
+	{
+		GEngine->AddOnScreenDebugMessage(2, 5.f, FColor::Blue, TEXT("StartSprint"));
+		GetCharacterMovement()->MaxWalkSpeed = GetCharacterStats()->SprintSpeed;
+	}
+}
+
+void AGD_Character::SprintEnd_Client_Implementation()
+{
+	if (GetCharacterStats())
+	{
+		GEngine->AddOnScreenDebugMessage(2, 5.f, FColor::Blue, TEXT("EndSprint"));
+		GetCharacterMovement()->MaxWalkSpeed = GetCharacterStats()->WalkSpeed;
 	}
 }

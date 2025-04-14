@@ -18,6 +18,8 @@ class GIDIDUNGEON_API UGD_WeaponProjectileComponent : public USceneComponent
 	class UInputMappingContext* WeaponMappingContext;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Projectile|Components|Input", meta=(AllowPrivateAccess = "true"))
 	class UInputAction* ThrowAction;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Projectile|Animations", meta=(AllowPrivateAccess = "true"))
+	UAnimMontage* ThrowAnimation;
 public:
 	// Sets default values for this component's properties
 	UGD_WeaponProjectileComponent();
@@ -33,6 +35,9 @@ protected:
 	// Replicated Server Functions
 	UFUNCTION(Server, Reliable)
 	void Throw_Server();
+	// Replicated Client Functions
+	UFUNCTION(NetMulticast, Unreliable)
+	void Throw_Client();
 public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,

@@ -66,6 +66,13 @@ protected:
 	void SprintEnd_Server();
 	UFUNCTION(Server, Reliable)
 	void Interact_Server();
+
+	
+	// Replicated Multicast Client Functions
+	UFUNCTION(NetMulticast, Reliable)
+	void SprintStart_Client();
+	UFUNCTION(NetMulticast, Reliable)
+	void SprintEnd_Client();
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
